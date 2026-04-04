@@ -1,4 +1,5 @@
 import { ChangedFile } from "./types";
+import crypto from "crypto";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -99,14 +100,17 @@ export function verifyWebhookSignature(
 ): boolean {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!secret) return true;
+  if (!signature) return false;
 
-  const crypto = require("crypto");
-  const expected = crypto
+  const expected = `sha256=${crypto
     .createHmac("sha256", secret)
     .update(payload)
-    .digest("hex");
+    .digest("hex")}`;
+
+  if (expected.length !== signature.length) return false;
+
   return crypto.timingSafeEqual(
-    Buffer.from(`sha256=${expected}`),
+    Buffer.from(expected),
     Buffer.from(signature)
   );
 }
