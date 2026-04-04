@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { NavUser } from "@/components/nav-user";
 import "./globals.css";
 
@@ -55,7 +56,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  let session = await getSession();
+
+  if (session) {
+    const companyExists = await prisma.company.findUnique({
+      where: { id: session.companyId },
+      select: { id: true },
+    });
+    if (!companyExists) session = null;
+  }
 
   return (
     <html lang="en" className="dark">

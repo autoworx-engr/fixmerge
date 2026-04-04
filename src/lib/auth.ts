@@ -50,3 +50,8 @@ export async function getSession(): Promise<SessionPayload | null> {
     return null;
   }
 }
+
+export async function clearSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+}

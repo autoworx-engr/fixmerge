@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getSession, clearSession } from "@/lib/auth";
 import { GradeBadge } from "@/components/grade-badge";
 import { GradeDistribution } from "@/components/grade-distribution";
 import { ProjectSetup } from "@/components/project-setup";
@@ -28,7 +29,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const session = await getSession();
-  if (!session) return null;
+  if (!session) redirect("/login");
 
   const company = await prisma.company.findUnique({
     where: { id: session.companyId },
@@ -44,7 +45,10 @@ export default async function Dashboard() {
     },
   });
 
-  if (!company) return null;
+  if (!company) {
+    await clearSession();
+    redirect("/login");
+  }
 
   const project = company.projects[0];
   const analyses = project?.analyses ?? [];
