@@ -14,6 +14,7 @@ model PRAnalysis {
   prTitle       String   @default("")
   prUrl         String   @default("")
   author        String   @default("")
+  trigger       String   @default("opened") // opened, synchronize, merged
   mergedAt      DateTime?
   baseBranch    String   @default("")
   headBranch    String   @default("")
@@ -30,6 +31,7 @@ model PRAnalysis {
   issues Issue[]
 
   @@index([repoFullName])
+  @@index([repoFullName, prNumber])
 }
 
 model Issue {

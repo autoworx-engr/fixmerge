@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { verifyWebhookSignature } from "@/lib/github";
 import { runAnalysis } from "@/lib/engine";
 
+const TRIGGER_ACTIONS = new Set(["opened", "synchronize", "reopened"]);
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -22,16 +24,28 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = JSON.parse(body);
-    const action = payload.action;
+    const action: string = payload.action;
     const pr = payload.pull_request;
 
-    if (action !== "closed" || !pr?.merged) {
-      return NextResponse.json({ status: "ignored", reason: "not a merge" });
+    const isMerge = action === "closed" && pr?.merged === true;
+    const isReviewTrigger = TRIGGER_ACTIONS.has(action);
+
+    if (!isMerge && !isReviewTrigger) {
+      return NextResponse.json({ status: "ignored", action });
     }
 
     const repo: string = payload.repository.full_name;
     const prNumber: number = pr.number;
     const headSha: string = pr.head.sha;
+    const trigger = isMerge ? "merged" : action;
+
+    // For synchronize (new push), delete the previous analysis for this PR
+    // so only the latest review is shown
+    if (action === "synchronize") {
+      await prisma.pRAnalysis.deleteMany({
+        where: { repoFullName: repo, prNumber, trigger: { not: "merged" } },
+      });
+    }
 
     const analysis = await prisma.pRAnalysis.create({
       data: {
@@ -40,6 +54,7 @@ export async function POST(request: NextRequest) {
         prTitle: pr.title || "",
         prUrl: pr.html_url || "",
         author: pr.user?.login || "",
+        trigger,
         mergedAt: pr.merged_at ? new Date(pr.merged_at) : null,
         baseBranch: pr.base?.ref || "",
         headBranch: pr.head?.ref || "",
@@ -51,7 +66,11 @@ export async function POST(request: NextRequest) {
       console.error("Background analysis failed:", err)
     );
 
-    return NextResponse.json({ status: "queued", analysisId: analysis.id });
+    return NextResponse.json({
+      status: "queued",
+      analysisId: analysis.id,
+      trigger,
+    });
   } catch (err) {
     console.error("Webhook error:", err);
     return NextResponse.json(

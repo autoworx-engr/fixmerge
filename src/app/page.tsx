@@ -185,6 +185,13 @@ export default async function Dashboard() {
                       <span className="font-mono text-[13px] font-semibold text-[var(--accent-light)] group-hover:text-white transition-colors">
                         #{a.prNumber}
                       </span>
+                      <span className={`px-1.5 py-[1px] rounded text-[9px] font-mono font-bold uppercase border ${
+                        a.trigger === 'merged'
+                          ? 'text-violet-400 bg-violet-500/8 border-violet-500/15'
+                          : 'text-[var(--accent)] bg-[var(--accent-glow)] border-[var(--accent)]/15'
+                      }`}>
+                        {a.trigger === 'merged' ? 'merged' : a.trigger === 'synchronize' ? 'updated' : 'review'}
+                      </span>
                       <span className="text-[13px] text-[var(--text-secondary)] truncate group-hover:text-[var(--text-primary)] transition-colors">
                         {a.prTitle}
                       </span>

@@ -55,7 +55,7 @@ function formatPRComment(
   ];
 
   if (findings.length === 0) {
-    lines.push("**No issues found.** Clean merge! ✅");
+    lines.push("**No issues found.** Looking clean — safe to merge ✅");
     return lines.join("\n");
   }
 
