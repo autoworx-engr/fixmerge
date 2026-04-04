@@ -15,7 +15,8 @@ When a PR is merged on GitHub, CodeSentry:
    - **Quality Analyzer** — linter suppressions, empty catch blocks, wildcard imports, PR size (7+ rules)
 4. **Scores the PR** from 0–100 and assigns a grade (A–F)
 5. **Posts a comment** on the PR with a summary of findings
-6. **Displays everything** on a dark-themed web dashboard
+6. **AI Explainer** — get AI-powered summaries and per-issue deep explanations
+7. **Displays everything** on a premium dark dashboard with animated charts
 
 ## Quick Start
 
@@ -54,6 +55,8 @@ For local development, use [ngrok](https://ngrok.com) to expose localhost.
 | `POST` | `/api/webhook/github` | GitHub webhook receiver |
 | `GET` | `/api/analyses` | List all analyses (JSON) |
 | `GET` | `/api/analyses/:id` | Get analysis details with issues (JSON) |
+| `POST` | `/api/ai/explain` | AI-powered issue explanation |
+| `GET` | `/api/ai/summary?id=` | AI-powered PR analysis summary |
 | `GET` | `/api/health` | Health check |
 | `GET` | `/` | Web dashboard |
 | `GET` | `/report/:id` | Detailed report page |
@@ -65,6 +68,7 @@ For local development, use [ngrok](https://ngrok.com) to expose localhost.
 - **Tailwind CSS v4**
 - **Prisma** with SQLite
 - **GitHub API** for PR data
+- **OpenAI API** (or compatible) for AI explanations
 
 ## Project Structure
 
@@ -77,6 +81,8 @@ src/
 │   │   ├── webhook/github/route.ts   # Webhook receiver
 │   │   ├── analyses/route.ts         # List analyses
 │   │   ├── analyses/[id]/route.ts    # Analysis detail
+│   │   ├── ai/explain/route.ts       # AI issue explainer
+│   │   ├── ai/summary/route.ts       # AI PR summary
 │   │   └── health/route.ts           # Health check
 │   ├── layout.tsx
 │   └── globals.css
@@ -84,6 +90,7 @@ src/
 │   ├── db.ts                         # Prisma client
 │   ├── github.ts                     # GitHub API client
 │   ├── engine.ts                     # Analysis orchestrator
+│   ├── ai.ts                         # AI explainer (OpenAI)
 │   ├── types.ts                      # Shared types
 │   └── analyzers/
 │       ├── bug-detector.ts           # 14 bug-pattern rules
@@ -94,7 +101,11 @@ src/
 │       └── index.ts
 ├── components/
 │   ├── grade-badge.tsx
+│   ├── grade-distribution.tsx        # Animated donut + bar chart
+│   ├── score-ring.tsx                # Animated SVG score ring
 │   ├── severity-pill.tsx
-│   └── issue-card.tsx
+│   ├── issue-card.tsx
+│   ├── ai-summary.tsx                # AI PR summary panel
+│   └── ai-explain-button.tsx         # Per-issue AI explainer
 └── generated/prisma/                 # Prisma generated client
 ```
