@@ -50,7 +50,7 @@ function formatPRComment(
   };
 
   const lines = [
-    `## ${emoji[grade] || "⚪"} CodeSentry Analysis — Grade: **${grade}** (Score: ${score}/100)`,
+    `## ${emoji[grade] || "⚪"} FixMerge Analysis — Grade: **${grade}** (Score: ${score}/100)`,
     "",
   ];
 
@@ -98,7 +98,7 @@ function formatPRComment(
   }
 
   lines.push(
-    `<sub>Analyzed by <b>CodeSentry</b> • ${findings.length} issues found</sub>`
+    `<sub>Analyzed by <b>FixMerge</b> • ${findings.length} issues found</sub>`
   );
   return lines.join("\n");
 }

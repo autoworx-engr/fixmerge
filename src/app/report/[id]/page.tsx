@@ -43,12 +43,12 @@ interface Analysis {
 
 const CATEGORIES = ["all", "bug", "security", "complexity", "quality"] as const;
 
-const categoryConfig: Record<string, { icon: string; label: string }> = {
-  all: { icon: "A", label: "All" },
-  bug: { icon: "B", label: "Bugs" },
-  security: { icon: "S", label: "Security" },
-  complexity: { icon: "C", label: "Complexity" },
-  quality: { icon: "Q", label: "Quality" },
+const categoryConfig: Record<string, { label: string; icon: string }> = {
+  all: { label: "All", icon: "⊕" },
+  bug: { label: "Bugs", icon: "B" },
+  security: { label: "Security", icon: "S" },
+  complexity: { label: "Complexity", icon: "C" },
+  quality: { label: "Quality", icon: "Q" },
 };
 
 export default function ReportPage() {
@@ -81,9 +81,11 @@ export default function ReportPage() {
   if (!analysis) {
     return (
       <div className="max-w-[960px] mx-auto text-center py-20">
-        <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="text-red-400">
-            <path d="M2.343 13.657A8 8 0 1 1 13.66 2.343 8 8 0 0 1 2.343 13.657ZM6.03 4.97a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042L6.94 8 4.97 9.97a.749.749 0 0 0 .326 1.275.749.749 0 0 0 .734-.215L8 9.06l1.97 1.97a.749.749 0 0 0 1.275-.326.749.749 0 0 0-.215-.734L9.06 8l1.97-1.97a.749.749 0 0 0-.326-1.275.749.749 0 0 0-.734.215L8 6.94Z"/>
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-4 border border-red-500/15">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-red-400">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
         </div>
         <h1 className="text-lg font-bold mb-2">Analysis not found</h1>
@@ -107,21 +109,19 @@ export default function ReportPage() {
   return (
     <div className="max-w-[960px] mx-auto">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-[13px] text-[var(--text-muted)] mb-6">
+      <div className="flex items-center gap-2 text-[13px] text-[var(--text-muted)] mb-6 font-mono">
         <Link href="/" className="text-[var(--text-secondary)] hover:text-[var(--accent-light)] transition-colors">
-          Dashboard
+          dashboard
         </Link>
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
-        </svg>
-        <span className="text-[var(--text-secondary)]">PR #{analysis.prNumber}</span>
+        <span className="text-[var(--accent)]/40">/</span>
+        <span className="text-[var(--text-secondary)]">pr-{analysis.prNumber}</span>
       </div>
 
       {/* Report Header Card */}
-      <div className="glass rounded-2xl p-6 mb-6">
+      <div className="card rounded-2xl p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-6">
           {/* Score Ring */}
-          <div className="flex flex-col items-center gap-2 shrink-0">
+          <div className="flex flex-col items-center gap-3 shrink-0">
             <ScoreRing score={analysis.score} size={130} strokeWidth={10} />
             <GradeBadge grade={analysis.grade} size="sm" />
           </div>
@@ -131,22 +131,22 @@ export default function ReportPage() {
             <h1 className="text-xl font-bold text-[var(--text-primary)] mb-1 leading-snug">
               {analysis.prTitle}
             </h1>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--text-muted)] mb-5">
-              <span className="text-[var(--text-secondary)] font-medium">#{analysis.prNumber}</span>
-              <span>&middot;</span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--text-muted)] mb-5 font-mono">
+              <span className="text-[var(--accent-light)] font-semibold">#{analysis.prNumber}</span>
+              <span className="text-[var(--text-muted)] text-[10px]">/</span>
               <span>{analysis.repo}</span>
-              <span>&middot;</span>
-              <span>by {analysis.author}</span>
+              <span className="text-[var(--text-muted)] text-[10px]">/</span>
+              <span>{analysis.author}</span>
               {analysis.prUrl && (
                 <>
-                  <span>&middot;</span>
+                  <span className="text-[var(--text-muted)] text-[10px]">/</span>
                   <a
                     href={analysis.prUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[var(--accent-light)] hover:underline"
                   >
-                    GitHub
+                    github ↗
                   </a>
                 </>
               )}
@@ -154,10 +154,10 @@ export default function ReportPage() {
 
             {/* Severity breakdown */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <SeverityStat label="Critical" count={analysis.critical} color="text-red-400" bg="bg-red-500/8" ring="ring-red-500/15" />
-              <SeverityStat label="High" count={analysis.high} color="text-rose-400" bg="bg-rose-500/8" ring="ring-rose-500/15" />
-              <SeverityStat label="Medium" count={analysis.medium} color="text-amber-400" bg="bg-amber-500/8" ring="ring-amber-500/15" />
-              <SeverityStat label="Low" count={analysis.low} color="text-yellow-400" bg="bg-yellow-500/8" ring="ring-yellow-500/15" />
+              <SeverityStat label="Critical" count={analysis.critical} color="text-red-400" borderColor="border-red-500/15" bg="bg-red-500/6" />
+              <SeverityStat label="High" count={analysis.high} color="text-rose-400" borderColor="border-rose-500/15" bg="bg-rose-500/6" />
+              <SeverityStat label="Medium" count={analysis.medium} color="text-amber-400" borderColor="border-amber-500/15" bg="bg-amber-500/6" />
+              <SeverityStat label="Low" count={analysis.low} color="text-yellow-400" borderColor="border-yellow-500/15" bg="bg-yellow-500/6" />
             </div>
           </div>
         </div>
@@ -181,15 +181,15 @@ export default function ReportPage() {
                 <button
                   key={cat}
                   onClick={() => setFilter(cat)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all cursor-pointer border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-mono font-semibold transition-all cursor-pointer border ${
                     active
-                      ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_12px_var(--accent-glow-strong)]"
+                      ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_16px_var(--accent-glow-strong)]"
                       : "bg-transparent text-[var(--text-secondary)] border-[var(--border-default)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {config.label}
                   {count > 0 && (
-                    <span className={`text-[11px] tabular-nums ${active ? "text-white/70" : "text-[var(--text-muted)]"}`}>
+                    <span className={`text-[10px] tabular-nums ${active ? "text-white/70" : "text-[var(--text-muted)]"}`}>
                       {count}
                     </span>
                   )}
@@ -204,23 +204,23 @@ export default function ReportPage() {
               <IssueCard key={issue.id} issue={issue} />
             ))}
             {filteredIssues.length === 0 && (
-              <div className="glass rounded-2xl text-center py-12 text-[var(--text-muted)]">
+              <div className="card rounded-2xl text-center py-12 text-[var(--text-muted)] font-mono text-[13px]">
                 No {filter} issues found.
               </div>
             )}
           </div>
         </>
       ) : (
-        <div className="glass rounded-2xl text-center py-16">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" className="text-emerald-400">
-              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+        <div className="card rounded-2xl text-center py-16">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 border border-emerald-500/15">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+              <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
           <p className="text-emerald-400 text-[15px] font-semibold mb-1">
             No issues found
           </p>
-          <p className="text-[13px] text-[var(--text-muted)]">
+          <p className="text-[13px] text-[var(--text-muted)] font-mono">
             This PR passed all checks cleanly.
           </p>
         </div>
@@ -233,21 +233,22 @@ function SeverityStat({
   label,
   count,
   color,
+  borderColor,
   bg,
-  ring,
 }: {
   label: string;
   count: number;
   color: string;
+  borderColor: string;
   bg: string;
-  ring: string;
+  ring?: string;
 }) {
   return (
-    <div className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl ${bg} ring-1 ${ring}`}>
+    <div className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl ${bg} border ${borderColor}`}>
       <span className={`text-xl font-black tabular-nums ${color}`}>
         {count}
       </span>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[var(--text-muted)]">
         {label}
       </span>
     </div>

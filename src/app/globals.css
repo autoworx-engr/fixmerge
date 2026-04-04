@@ -8,19 +8,22 @@
 }
 
 :root {
-  --bg-root: #09090b;
-  --bg-surface: #111114;
-  --bg-raised: #18181c;
-  --bg-overlay: #1e1e24;
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.1);
-  --text-primary: #f0f0f3;
-  --text-secondary: #8a8a9a;
-  --text-muted: #55556a;
-  --accent: #8b5cf6;
-  --accent-light: #a78bfa;
-  --accent-glow: rgba(139, 92, 246, 0.15);
-  --accent-glow-strong: rgba(139, 92, 246, 0.3);
+  --bg-root: #0a0e17;
+  --bg-surface: #0f1420;
+  --bg-raised: #151b2b;
+  --bg-overlay: #1a2235;
+  --border-default: rgba(56, 189, 248, 0.06);
+  --border-hover: rgba(56, 189, 248, 0.14);
+  --border-active: rgba(56, 189, 248, 0.25);
+  --text-primary: #e8edf5;
+  --text-secondary: #7b8ba5;
+  --text-muted: #3e4f6a;
+  --accent: #0ea5e9;
+  --accent-light: #38bdf8;
+  --accent-glow: rgba(14, 165, 233, 0.12);
+  --accent-glow-strong: rgba(14, 165, 233, 0.25);
+  --accent-secondary: #818cf8;
+  --accent-warm: #f59e0b;
 }
 
 html { scroll-behavior: smooth; }
@@ -31,7 +34,18 @@ body {
   color: var(--text-primary);
 }
 
-/* Animated mesh gradient background */
+/* Grid dot pattern background */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.035) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+/* Animated gradient orbs */
 .mesh-bg {
   position: fixed;
   inset: 0;
@@ -42,59 +56,153 @@ body {
 .mesh-bg::before {
   content: '';
   position: absolute;
-  width: 600px;
-  height: 600px;
-  top: -200px;
-  left: -100px;
-  background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
-  animation: float1 20s ease-in-out infinite;
+  width: 700px;
+  height: 700px;
+  top: -300px;
+  left: -200px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.07) 0%, transparent 65%);
+  animation: orb1 25s ease-in-out infinite;
 }
 .mesh-bg::after {
   content: '';
   position: absolute;
-  width: 500px;
-  height: 500px;
-  bottom: -150px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
-  animation: float2 25s ease-in-out infinite;
+  width: 600px;
+  height: 600px;
+  bottom: -200px;
+  right: -150px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.05) 0%, transparent 65%);
+  animation: orb2 30s ease-in-out infinite;
 }
-@keyframes float1 {
+@keyframes orb1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(100px, 50px) scale(1.1); }
-  66% { transform: translate(-50px, 100px) scale(0.95); }
+  33% { transform: translate(120px, 80px) scale(1.15); }
+  66% { transform: translate(-60px, 120px) scale(0.9); }
 }
-@keyframes float2 {
+@keyframes orb2 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-80px, -60px) scale(1.15); }
+  50% { transform: translate(-100px, -80px) scale(1.2); }
 }
 
-/* Noise texture overlay */
-.noise-overlay {
+/* Scan line accent - unique to FixMerge */
+.scan-line {
   position: fixed;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.015;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 100;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(14, 165, 233, 0) 20%,
+    rgba(14, 165, 233, 0.5) 50%,
+    rgba(14, 165, 233, 0) 80%,
+    transparent 100%
+  );
+  animation: scanPulse 4s ease-in-out infinite;
+}
+@keyframes scanPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }
 
-/* Glass card */
-.glass {
-  background: rgba(17, 17, 20, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+/* Card styles - sharp + layered, not generic glass */
+.card {
+  background: linear-gradient(135deg, rgba(15, 20, 32, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%);
   border: 1px solid var(--border-default);
+  position: relative;
+  overflow: hidden;
 }
-.glass:hover {
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.15), transparent);
+}
+.card:hover {
   border-color: var(--border-hover);
 }
+.card:hover::before {
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.3), transparent);
+}
 
-/* Glow ring for score */
+/* Bento card - for stat blocks */
+.bento {
+  background: linear-gradient(160deg, rgba(15, 20, 32, 0.95) 0%, rgba(21, 27, 43, 0.6) 100%);
+  border: 1px solid var(--border-default);
+  position: relative;
+}
+.bento::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+.bento-featured {
+  background: linear-gradient(160deg, rgba(14, 165, 233, 0.06) 0%, rgba(15, 20, 32, 0.95) 50%);
+  border-color: rgba(14, 165, 233, 0.12);
+}
+.bento-featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+  border-radius: 2px 2px 0 0;
+}
+
+/* Terminal-style list item */
+.terminal-row {
+  background: rgba(15, 20, 32, 0.5);
+  border: 1px solid transparent;
+  position: relative;
+  transition: all 0.2s ease;
+}
+.terminal-row:hover {
+  background: rgba(14, 165, 233, 0.04);
+  border-color: var(--border-hover);
+}
+.terminal-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-default);
+  transition: background 0.2s;
+}
+.terminal-row:hover::before {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Merge branch connector for list items */
+.merge-connector {
+  position: relative;
+}
+.merge-connector::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 100%;
+  width: 2px;
+  height: 8px;
+  background: rgba(56, 189, 248, 0.08);
+}
+.merge-connector:last-child::after {
+  display: none;
+}
+
+/* Score ring glow */
 .score-ring {
-  filter: drop-shadow(0 0 8px var(--accent-glow-strong));
+  filter: drop-shadow(0 0 12px var(--accent-glow-strong));
 }
 
 /* Shimmer loading */
@@ -109,8 +217,53 @@ body {
   border-radius: 8px;
 }
 
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mono label - terminal aesthetic */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Pulse dot */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Status bar */
+.status-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bg-overlay);
+  overflow: hidden;
+}
+.status-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease-out;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.16); }
+
+/* Selection */
+::selection {
+  background: rgba(14, 165, 233, 0.3);
+  color: var(--text-primary);
+}

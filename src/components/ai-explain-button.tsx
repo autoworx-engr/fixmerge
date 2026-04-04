@@ -15,10 +15,10 @@ interface IssueForAI {
 
 function renderMarkdown(text: string): string {
   return text
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-black/30 border border-[var(--border-default)] rounded-lg px-3 py-2 mt-2 mb-2 text-[12px] font-mono overflow-x-auto whitespace-pre text-[var(--text-primary)]">$2</pre>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-[var(--bg-root)] border border-[var(--border-default)] rounded-lg px-3 py-2 mt-2 mb-2 text-[11px] font-mono overflow-x-auto whitespace-pre text-[var(--text-primary)]">$2</pre>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>')
-    .replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-black/30 text-[11px] font-mono text-[var(--accent-light)]">$1</code>')
-    .replace(/^(\d+)\.\s/gm, '<span class="text-[var(--accent-light)] font-semibold">$1.</span> ')
+    .replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-[var(--bg-root)] text-[10px] font-mono text-[var(--accent-light)] border border-[var(--border-default)]">$1</code>')
+    .replace(/^(\d+)\.\s/gm, '<span class="text-[var(--accent-light)] font-mono font-semibold">$1.</span> ')
     .replace(/\n/g, "<br/>");
 }
 
@@ -56,32 +56,32 @@ export function AIExplainButton({ issue }: { issue: IssueForAI }) {
     <div className="mt-3">
       <button
         onClick={explain}
-        className="flex items-center gap-1.5 text-[12px] font-medium text-violet-400/80 hover:text-violet-300 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 text-[11px] font-mono font-semibold text-[var(--accent)]/70 hover:text-[var(--accent-light)] transition-colors cursor-pointer"
       >
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M7.53 1.282a.5.5 0 0 1 .94 0l1.478 4.03a.5.5 0 0 0 .311.297l4.03 1.281a.5.5 0 0 1 0 .942l-4.03 1.281a.5.5 0 0 0-.311.297L8.47 13.64a.5.5 0 0 1-.94 0L6.052 9.61a.5.5 0 0 0-.311-.297L1.711 8.032a.5.5 0 0 1 0-.942l4.03-1.281a.5.5 0 0 0 .311-.297L7.53 1.282Z"/>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
-        {explanation ? (open ? "Hide AI explanation" : "Show AI explanation") : "Explain with AI"}
+        {explanation ? (open ? "hide explanation" : "show explanation") : "explain with ai"}
       </button>
 
       {open && (
-        <div className="mt-2 px-3.5 py-3 rounded-xl bg-violet-500/[0.04] border border-violet-500/10">
+        <div className="mt-2 px-3.5 py-3 rounded-xl bg-[var(--accent-glow)] border border-[var(--accent)]/10">
           {loading && (
             <div className="flex items-center gap-2">
               <div className="flex gap-1">
-                <span className="w-1 h-1 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1 h-1 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1 h-1 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
-              <span className="text-[12px] text-[var(--text-muted)]">Thinking...</span>
+              <span className="text-[12px] font-mono text-[var(--text-muted)]">thinking...</span>
             </div>
           )}
 
           {error && (
-            <div className="text-[12px] text-red-400">
+            <div className="text-[12px] text-red-400 font-mono">
               {error}
-              <button onClick={explain} className="ml-2 text-violet-400 hover:underline cursor-pointer">
-                Retry
+              <button onClick={explain} className="ml-2 text-[var(--accent-light)] hover:underline cursor-pointer">
+                retry
               </button>
             </div>
           )}

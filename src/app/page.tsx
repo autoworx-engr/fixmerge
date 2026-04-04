@@ -47,46 +47,88 @@ export default async function Dashboard() {
 
   return (
     <>
-      {/* Hero stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          label="Total Scans"
-          value={total.toString()}
-          icon={
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" className="text-[var(--accent-light)]">
-              <path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.28 9.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.25-3.25a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>
+      {/* Hero section with tagline */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--text-primary)]">
+            Dashboard
+          </h1>
+          <div className="h-px flex-1 bg-gradient-to-r from-[var(--border-default)] to-transparent" />
+          <span className="mono-label">
+            {total} {total === 1 ? "scan" : "scans"} total
+          </span>
+        </div>
+      </div>
+
+      {/* Bento stats grid - asymmetric layout */}
+      <div className="grid grid-cols-6 lg:grid-cols-12 gap-3 mb-8">
+        {/* Featured stat - takes more space */}
+        <div className="col-span-6 bento bento-featured rounded-2xl p-6 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="mono-label mb-3">avg quality score</div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-black tabular-nums text-gradient">
+                  {avgScore}
+                </span>
+                <span className="text-lg font-medium text-[var(--text-muted)]">/100</span>
+              </div>
+              <div className="mt-3 status-bar w-full max-w-[200px]">
+                <div
+                  className="status-bar-fill"
+                  style={{
+                    width: `${avgScore}%`,
+                    background: `linear-gradient(90deg, ${avgScore >= 80 ? '#34d399' : avgScore >= 60 ? '#fbbf24' : '#f87171'}, ${avgScore >= 80 ? '#0ea5e9' : avgScore >= 60 ? '#fb923c' : '#ef4444'})`,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="w-16 h-16 rounded-2xl bg-[var(--accent-glow)] flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--accent-light)]">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary stats */}
+        <div className="col-span-3 lg:col-span-2 bento rounded-2xl p-5 relative overflow-hidden">
+          <div className="mono-label mb-2">scans</div>
+          <span className="text-2xl font-black tabular-nums text-[var(--text-primary)]">
+            {total}
+          </span>
+          <div className="absolute top-4 right-4">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-[var(--text-muted)]">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
             </svg>
-          }
-        />
-        <StatCard
-          label="Avg Score"
-          value={`${avgScore}`}
-          suffix="/100"
-          highlight
-          icon={
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" className="text-emerald-400">
-              <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+          </div>
+        </div>
+
+        <div className="col-span-3 lg:col-span-2 bento rounded-2xl p-5 relative overflow-hidden">
+          <div className="mono-label mb-2">clean</div>
+          <span className="text-2xl font-black tabular-nums text-emerald-400">
+            {cleanCount}
+          </span>
+          <div className="absolute top-4 right-4">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500/40">
+              <polyline points="20 6 9 17 4 12"/>
             </svg>
-          }
-        />
-        <StatCard
-          label="Clean Merges"
-          value={cleanCount.toString()}
-          icon={
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" className="text-emerald-400">
-              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+          </div>
+        </div>
+
+        <div className="col-span-6 lg:col-span-2 bento rounded-2xl p-5 relative overflow-hidden">
+          <div className="mono-label mb-2">issues found</div>
+          <span className={`text-2xl font-black tabular-nums ${totalIssues > 0 ? 'text-amber-400' : 'text-[var(--text-primary)]'}`}>
+            {totalIssues}
+          </span>
+          <div className="absolute top-4 right-4">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500/40">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-          }
-        />
-        <StatCard
-          label="Issues Found"
-          value={totalIssues.toString()}
-          icon={
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" className="text-amber-400">
-              <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707L2.138 13.132a.25.25 0 0 0 .22.368h12.284a.25.25 0 0 0 .22-.368L8.78 1.754a.25.25 0 0 0-.44 0ZM8 5a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 5Zm0 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-            </svg>
-          }
-        />
+          </div>
+        </div>
       </div>
 
       {/* Grade distribution */}
@@ -94,168 +136,142 @@ export default async function Dashboard() {
         <GradeDistribution distribution={gradeDistribution} total={completed.length} />
       )}
 
-      {/* PR List */}
-      <div className="mb-4">
-        <h2 className="text-[13px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-          Recent Analyses
-        </h2>
+      {/* PR Feed */}
+      <div className="mb-5">
+        <div className="flex items-center gap-3">
+          <h2 className="text-[13px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+            Recent Analyses
+          </h2>
+          <div className="h-px flex-1 bg-gradient-to-r from-[var(--border-default)] to-transparent" />
+        </div>
       </div>
 
       {analyses.length > 0 ? (
-        <div className="space-y-2">
-          {analyses.map((a) => {
+        <div className="space-y-0">
+          {analyses.map((a, idx) => {
             const grade = getGrade(a.score);
             return (
-              <Link
-                key={a.id}
-                href={`/report/${a.id}`}
-                className="group glass rounded-xl p-4 flex items-center gap-4 transition-all hover:border-[var(--accent)]/20 hover:bg-[var(--accent-glow)] block"
-              >
-                {/* Grade */}
-                <GradeBadge grade={grade} />
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-light)] transition-colors">
-                      #{a.prNumber}
-                    </span>
-                    <span className="text-[13px] text-[var(--text-secondary)] truncate">
-                      {a.prTitle}
-                    </span>
+              <div key={a.id} className="merge-connector">
+                <Link
+                  href={`/report/${a.id}`}
+                  className="group terminal-row rounded-xl p-4 flex items-center gap-4 transition-all block"
+                >
+                  {/* Merge node indicator */}
+                  <div className="flex flex-col items-center gap-1 shrink-0 w-8">
+                    <div className={`w-3 h-3 rounded-full border-2 transition-colors ${
+                      a.status === 'completed'
+                        ? a.totalIssues === 0
+                          ? 'border-emerald-400 bg-emerald-400/20'
+                          : a.score >= 70
+                            ? 'border-[var(--accent)] bg-[var(--accent-glow)]'
+                            : 'border-amber-400 bg-amber-400/20'
+                        : a.status === 'running'
+                          ? 'border-blue-400 bg-blue-400/20 animate-pulse'
+                          : a.status === 'failed'
+                            ? 'border-red-400 bg-red-400/20'
+                            : 'border-[var(--text-muted)] bg-transparent'
+                    }`} />
+                    {idx < analyses.length - 1 && (
+                      <div className="w-px h-2 bg-[var(--border-default)]" />
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[12px] text-[var(--text-muted)]">
-                      {a.repoFullName}
-                    </span>
-                    <span className="text-[var(--text-muted)]">&middot;</span>
-                    <span className="text-[12px] text-[var(--text-muted)]">
-                      {a.author}
-                    </span>
-                    <span className="text-[var(--text-muted)]">&middot;</span>
-                    <span className="text-[12px] text-[var(--text-muted)]">
-                      {timeAgo(a.createdAt)}
-                    </span>
-                  </div>
-                </div>
 
-                {/* Score pill */}
-                <div className="hidden sm:flex items-center gap-3">
-                  {a.totalIssues > 0 ? (
-                    <div className="flex items-center gap-1.5">
-                      {a.criticalCount > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-[2px] rounded-md text-[11px] font-semibold bg-red-500/10 text-red-400 ring-1 ring-red-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                          {a.criticalCount}
-                        </span>
-                      )}
-                      {a.highCount > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-[2px] rounded-md text-[11px] font-semibold bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                          {a.highCount}
-                        </span>
-                      )}
-                      {a.mediumCount > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-[2px] rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                          {a.mediumCount}
-                        </span>
-                      )}
-                      {a.lowCount > 0 && (
-                        <span className="flex items-center gap-1 px-1.5 py-[2px] rounded-md text-[11px] font-semibold bg-yellow-500/10 text-yellow-400 ring-1 ring-yellow-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                          {a.lowCount}
-                        </span>
-                      )}
+                  {/* Grade */}
+                  <GradeBadge grade={grade} />
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[13px] font-semibold text-[var(--accent-light)] group-hover:text-white transition-colors">
+                        #{a.prNumber}
+                      </span>
+                      <span className="text-[13px] text-[var(--text-secondary)] truncate group-hover:text-[var(--text-primary)] transition-colors">
+                        {a.prTitle}
+                      </span>
                     </div>
-                  ) : (
-                    <span className="px-2 py-[2px] rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
-                      Clean
-                    </span>
-                  )}
-                </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                        {a.repoFullName}
+                      </span>
+                      <span className="text-[var(--text-muted)] text-[10px]">/</span>
+                      <span className="text-[11px] text-[var(--text-muted)]">
+                        {a.author}
+                      </span>
+                      <span className="text-[var(--text-muted)] text-[10px]">/</span>
+                      <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                        {timeAgo(a.createdAt)}
+                      </span>
+                    </div>
+                  </div>
 
-                {/* Status + Arrow */}
-                <div className="flex items-center gap-2">
-                  <StatusDot status={a.status} />
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-[var(--text-muted)] group-hover:text-[var(--accent-light)] transition-colors">
-                    <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
+                  {/* Issue severity pills */}
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    {a.totalIssues > 0 ? (
+                      <>
+                        {a.criticalCount > 0 && (
+                          <span className="flex items-center gap-1 px-1.5 py-[2px] rounded text-[10px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/15">
+                            {a.criticalCount} crit
+                          </span>
+                        )}
+                        {a.highCount > 0 && (
+                          <span className="flex items-center gap-1 px-1.5 py-[2px] rounded text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/15">
+                            {a.highCount} high
+                          </span>
+                        )}
+                        {a.mediumCount > 0 && (
+                          <span className="flex items-center gap-1 px-1.5 py-[2px] rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/15">
+                            {a.mediumCount} med
+                          </span>
+                        )}
+                        {a.lowCount > 0 && (
+                          <span className="flex items-center gap-1 px-1.5 py-[2px] rounded text-[10px] font-mono font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/15">
+                            {a.lowCount} low
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="px-2 py-[2px] rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+                        clean
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Arrow */}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--text-muted)] group-hover:text-[var(--accent-light)] group-hover:translate-x-0.5 transition-all shrink-0">
+                    <polyline points="9 18 15 12 9 6"/>
                   </svg>
-                </div>
-              </Link>
+                </Link>
+              </div>
             );
           })}
         </div>
       ) : (
-        <div className="glass rounded-2xl text-center py-20">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--accent-glow)] flex items-center justify-center mx-auto mb-5">
-            <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" className="text-[var(--accent-light)]">
-              <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
-            </svg>
+        <div className="card rounded-2xl text-center py-20 relative">
+          {/* Terminal-style empty state */}
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)] mb-6">
+              <span className="w-2 h-2 rounded-full bg-red-500/60" />
+              <span className="w-2 h-2 rounded-full bg-amber-500/60" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500/60" />
+              <span className="font-mono text-[11px] text-[var(--text-muted)] ml-2">fixmerge</span>
+            </div>
+          </div>
+          <div className="font-mono text-[14px] text-[var(--text-muted)] space-y-1 mb-8">
+            <p><span className="text-[var(--accent)]">$</span> fixmerge status</p>
+            <p className="text-[var(--text-secondary)]">No analyses yet. Waiting for webhooks...</p>
           </div>
           <h2 className="text-lg font-bold text-[var(--text-primary)] mb-2">
-            No analyses yet
+            Ready to scan
           </h2>
-          <p className="text-[14px] text-[var(--text-secondary)] max-w-sm mx-auto mb-5">
-            Point a GitHub webhook at this server and merge a PR to start scanning.
+          <p className="text-[14px] text-[var(--text-secondary)] max-w-sm mx-auto mb-6">
+            Point a GitHub webhook at this server and merge a PR to start catching issues.
           </p>
-          <code className="inline-block px-4 py-2 rounded-lg bg-black/30 border border-[var(--border-default)] text-[13px] font-mono text-[var(--accent-light)]">
-            POST /api/webhook/github
+          <code className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] text-[13px] font-mono">
+            <span className="text-[var(--accent)]">POST</span>
+            <span className="text-[var(--text-primary)]">/api/webhook/github</span>
           </code>
         </div>
       )}
     </>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  suffix,
-  icon,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  suffix?: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
-}) {
-  return (
-    <div className={`glass rounded-2xl p-5 ${highlight ? "ring-1 ring-[var(--accent)]/15" : ""}`}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-          {label}
-        </span>
-        <div className="w-8 h-8 rounded-lg bg-white/[0.03] flex items-center justify-center">
-          {icon}
-        </div>
-      </div>
-      <div className="flex items-baseline gap-1">
-        <span className={`text-2xl font-black tabular-nums ${highlight ? "text-emerald-400" : "text-[var(--text-primary)]"}`}>
-          {value}
-        </span>
-        {suffix && (
-          <span className="text-[13px] font-medium text-[var(--text-muted)]">
-            {suffix}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatusDot({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    completed: "bg-emerald-400",
-    running: "bg-blue-400 animate-pulse",
-    pending: "bg-zinc-500",
-    failed: "bg-red-500",
-  };
-  return (
-    <span
-      className={`w-2 h-2 rounded-full ${colors[status] || colors.pending}`}
-      title={status}
-    />
   );
 }

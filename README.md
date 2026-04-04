@@ -1,10 +1,10 @@
-# CodeSentry
+# FixMerge
 
 A lightweight, self-hosted PR quality gate built with **Next.js**. Automatically analyzes merged pull requests for bugs, security issues, code complexity, and quality problems.
 
 ## What It Does
 
-When a PR is merged on GitHub, CodeSentry:
+When a PR is merged on GitHub, FixMerge:
 
 1. **Receives a webhook** from GitHub
 2. **Fetches the changed files** and their full content via GitHub API

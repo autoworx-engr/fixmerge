@@ -4,9 +4,8 @@ import { useState } from "react";
 
 function SparkleIcon({ className }: { className?: string }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className={className}>
-      <path d="M7.53 1.282a.5.5 0 0 1 .94 0l1.478 4.03a.5.5 0 0 0 .311.297l4.03 1.281a.5.5 0 0 1 0 .942l-4.03 1.281a.5.5 0 0 0-.311.297L8.47 13.64a.5.5 0 0 1-.94 0L6.052 9.61a.5.5 0 0 0-.311-.297L1.711 8.032a.5.5 0 0 1 0-.942l4.03-1.281a.5.5 0 0 0 .311-.297L7.53 1.282Z"/>
-      <path d="M13.042.95a.25.25 0 0 1 .47 0l.592 1.614a.25.25 0 0 0 .156.149l1.614.592a.25.25 0 0 1 0 .47l-1.614.593a.25.25 0 0 0-.156.148l-.592 1.614a.25.25 0 0 1-.47 0l-.593-1.614a.25.25 0 0 0-.148-.156L10.687 3.8a.25.25 0 0 1 0-.47l1.614-.593a.25.25 0 0 0 .148-.156L13.042.95Z"/>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
   );
 }
@@ -14,8 +13,8 @@ function SparkleIcon({ className }: { className?: string }) {
 function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>')
-    .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-black/30 text-[12px] font-mono text-[var(--accent-light)]">$1</code>')
-    .replace(/^(\d+)\.\s/gm, '<span class="text-[var(--accent-light)] font-semibold">$1.</span> ')
+    .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-[var(--bg-root)] text-[11px] font-mono text-[var(--accent-light)] border border-[var(--border-default)]">$1</code>')
+    .replace(/^(\d+)\.\s/gm, '<span class="text-[var(--accent-light)] font-mono font-semibold">$1.</span> ')
     .replace(/\n/g, "<br/>");
 }
 
@@ -43,20 +42,20 @@ export function AISummary({ analysisId }: { analysisId: number }) {
     return (
       <button
         onClick={generate}
-        className="w-full glass rounded-2xl p-5 flex items-center gap-3 cursor-pointer transition-all hover:border-[var(--accent)]/20 group"
+        className="w-full card rounded-2xl p-5 flex items-center gap-3 cursor-pointer transition-all hover:border-[var(--accent)]/20 group"
       >
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 ring-1 ring-violet-500/20 flex items-center justify-center shrink-0">
-          <SparkleIcon className="text-violet-400" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-glow)] to-indigo-500/10 border border-[var(--accent)]/15 flex items-center justify-center shrink-0">
+          <SparkleIcon className="text-[var(--accent-light)] w-4 h-4" />
         </div>
         <div className="text-left flex-1">
-          <div className="text-[14px] font-semibold text-[var(--text-primary)] group-hover:text-violet-300 transition-colors">
+          <div className="text-[14px] font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-light)] transition-colors">
             AI Analysis Summary
           </div>
-          <div className="text-[12px] text-[var(--text-muted)]">
-            Get an AI-powered overview of this PR&apos;s issues and recommendations
+          <div className="text-[12px] text-[var(--text-muted)] font-mono">
+            Get an AI-powered overview of this PR&apos;s issues
           </div>
         </div>
-        <div className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-[12px] font-semibold text-white shrink-0 shadow-lg shadow-violet-500/20">
+        <div className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[var(--accent)] to-[var(--accent-secondary)] text-[12px] font-bold text-white shrink-0">
           Generate
         </div>
       </button>
@@ -64,21 +63,21 @@ export function AISummary({ analysisId }: { analysisId: number }) {
   }
 
   return (
-    <div className="glass rounded-2xl overflow-hidden">
+    <div className="card rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-3.5 flex items-center gap-2.5 border-b border-[var(--border-default)] bg-gradient-to-r from-violet-500/[0.06] to-indigo-500/[0.03]">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500/25 to-indigo-500/25 flex items-center justify-center">
-          <SparkleIcon className="text-violet-400 w-3.5 h-3.5" />
+      <div className="px-5 py-3.5 flex items-center gap-2.5 border-b border-[var(--border-default)] bg-gradient-to-r from-[var(--accent-glow)] to-transparent">
+        <div className="w-7 h-7 rounded-lg bg-[var(--accent-glow)] border border-[var(--accent)]/15 flex items-center justify-center">
+          <SparkleIcon className="text-[var(--accent-light)] w-3.5 h-3.5" />
         </div>
-        <span className="text-[13px] font-semibold text-violet-300">
+        <span className="text-[13px] font-bold text-[var(--accent-light)]">
           AI Analysis Summary
         </span>
         {summary && (
           <button
             onClick={generate}
-            className="ml-auto text-[11px] text-[var(--text-muted)] hover:text-violet-400 transition-colors cursor-pointer"
+            className="ml-auto text-[11px] font-mono text-[var(--text-muted)] hover:text-[var(--accent-light)] transition-colors cursor-pointer"
           >
-            Regenerate
+            regenerate
           </button>
         )}
       </div>
@@ -88,11 +87,11 @@ export function AISummary({ analysisId }: { analysisId: number }) {
         {loading && (
           <div className="flex items-center gap-3">
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
-            <span className="text-[13px] text-[var(--text-muted)]">Analyzing with AI...</span>
+            <span className="text-[13px] font-mono text-[var(--text-muted)]">analyzing...</span>
           </div>
         )}
 
@@ -103,9 +102,9 @@ export function AISummary({ analysisId }: { analysisId: number }) {
               <span className="text-red-400">{error}</span>
               <button
                 onClick={generate}
-                className="ml-2 text-[var(--accent-light)] hover:underline cursor-pointer"
+                className="ml-2 text-[var(--accent-light)] hover:underline cursor-pointer font-mono"
               >
-                Retry
+                retry
               </button>
             </div>
           </div>
