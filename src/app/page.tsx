@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { GradeBadge } from "@/components/grade-badge";
+import { GradeDistribution } from "@/components/grade-distribution";
 
 function getGrade(score: number): string {
   if (score >= 90) return "A";
@@ -43,7 +44,6 @@ export default async function Dashboard() {
     const g = getGrade(a.score) as keyof typeof gradeDistribution;
     gradeDistribution[g]++;
   }
-  const maxGradeCount = Math.max(...Object.values(gradeDistribution), 1);
 
   return (
     <>
@@ -89,39 +89,9 @@ export default async function Dashboard() {
         />
       </div>
 
-      {/* Grade distribution mini chart */}
+      {/* Grade distribution */}
       {completed.length > 0 && (
-        <div className="glass rounded-2xl p-5 mb-8">
-          <h2 className="text-[13px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-4">
-            Grade Distribution
-          </h2>
-          <div className="flex items-end gap-3 h-16">
-            {(Object.entries(gradeDistribution) as [string, number][]).map(([grade, count]) => {
-              const height = count > 0 ? Math.max((count / maxGradeCount) * 100, 12) : 4;
-              const colors: Record<string, string> = {
-                A: "bg-emerald-500",
-                B: "bg-amber-500",
-                C: "bg-orange-500",
-                D: "bg-red-400",
-                F: "bg-red-600",
-              };
-              return (
-                <div key={grade} className="flex-1 flex flex-col items-center gap-1.5">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)] tabular-nums">
-                    {count}
-                  </span>
-                  <div
-                    className={`w-full rounded-md ${colors[grade]} opacity-70 transition-all duration-500`}
-                    style={{ height: `${height}%`, minHeight: count > 0 ? "6px" : "2px" }}
-                  />
-                  <span className="text-[11px] font-bold text-[var(--text-secondary)]">
-                    {grade}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <GradeDistribution distribution={gradeDistribution} total={completed.length} />
       )}
 
       {/* PR List */}

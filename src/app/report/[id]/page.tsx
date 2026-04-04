@@ -6,6 +6,7 @@ import Link from "next/link";
 import { GradeBadge } from "@/components/grade-badge";
 import { ScoreRing } from "@/components/score-ring";
 import { IssueCard } from "@/components/issue-card";
+import { AISummary } from "@/components/ai-summary";
 
 interface Issue {
   id: number;
@@ -160,6 +161,11 @@ export default function ReportPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* AI Summary */}
+      <div className="mb-6">
+        <AISummary analysisId={analysis.id} />
       </div>
 
       {/* Issues */}

@@ -1,4 +1,5 @@
 import { SeverityPill, CategoryPill } from "./severity-pill";
+import { AIExplainButton } from "./ai-explain-button";
 
 interface IssueData {
   id: number;
@@ -77,6 +78,9 @@ export function IssueCard({ issue }: { issue: IssueData }) {
             </p>
           </div>
         )}
+
+        {/* AI Explain */}
+        <AIExplainButton issue={issue} />
       </div>
     </div>
   );
