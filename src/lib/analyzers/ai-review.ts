@@ -7,6 +7,8 @@ function getApiKey(): string | null {
   return process.env.AI_API_KEY || process.env.OPENAI_API_KEY || null;
 }
 
+const AI_TIMEOUT_MS = 25_000;
+
 async function chat(
   messages: { role: string; content: string }[]
 ): Promise<string> {
@@ -16,27 +18,35 @@ async function chat(
   const model = process.env.AI_MODEL || "gpt-4o-mini";
   const baseUrl = process.env.AI_BASE_URL || OPENAI_API;
 
-  const res = await fetch(baseUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.2,
-      max_tokens: 4096,
-    }),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`AI API error ${res.status}: ${err}`);
+  try {
+    const res = await fetch(baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.2,
+        max_tokens: 4096,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`AI API error ${res.status}: ${err}`);
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || "";
+  } finally {
+    clearTimeout(timer);
   }
-
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content?.trim() || "";
 }
 
 const SYSTEM_PROMPT = `You are FixMerge, an expert code reviewer. Analyze the provided code diff and find REAL bugs — logic errors, semantic mistakes, and issues that regex-based linters cannot catch.

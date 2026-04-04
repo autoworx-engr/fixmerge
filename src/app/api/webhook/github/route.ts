@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyWebhookSignature } from "@/lib/github";
 import { runAnalysis } from "@/lib/engine";
@@ -39,8 +40,6 @@ export async function POST(request: NextRequest) {
     const headSha: string = pr.head.sha;
     const trigger = isMerge ? "merged" : action;
 
-    // For synchronize (new push), delete the previous analysis for this PR
-    // so only the latest review is shown
     if (action === "synchronize") {
       await prisma.pRAnalysis.deleteMany({
         where: { repoFullName: repo, prNumber, trigger: { not: "merged" } },
@@ -62,9 +61,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    runAnalysis(analysis.id, repo, prNumber, headSha).catch((err) =>
-      console.error("Background analysis failed:", err)
-    );
+    // after() keeps the serverless function alive after the response is sent.
+    // Without this, Vercel kills the function and the analysis never completes.
+    after(async () => {
+      try {
+        await runAnalysis(analysis.id, repo, prNumber, headSha);
+      } catch (err) {
+        console.error("Background analysis failed:", err);
+      }
+    });
 
     return NextResponse.json({
       status: "queued",
