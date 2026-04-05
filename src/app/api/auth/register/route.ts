@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword, signToken, SESSION_COOKIE } from "@/lib/auth";
+import { parseOwnerRepo } from "@/lib/repo";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,14 +27,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedRepo = repoFullName
-      .replace(/^https?:\/\/github\.com\//, "")
-      .replace(/\.git$/, "")
-      .replace(/\/$/, "");
-
-    if (!normalizedRepo.includes("/")) {
+    const normalizedRepo = parseOwnerRepo(repoFullName);
+    if (!normalizedRepo) {
       return NextResponse.json(
-        { error: "Repository must be in owner/repo format" },
+        { error: "Repository must be in owner/repo format (e.g. acme/web-app)" },
         { status: 400 }
       );
     }
