@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
     const headSha: string = pr.head.sha;
     const trigger = isMerge ? "merged" : action;
 
+    const project = await prisma.project.findUnique({
+      where: { repoFullName: repo },
+    });
+
     if (action === "synchronize") {
       await prisma.pRAnalysis.deleteMany({
         where: { repoFullName: repo, prNumber, trigger: { not: "merged" } },
@@ -58,11 +62,10 @@ export async function POST(request: NextRequest) {
         baseBranch: pr.base?.ref || "",
         headBranch: pr.head?.ref || "",
         status: "pending",
+        projectId: project?.id ?? null,
       },
     });
 
-    // after() keeps the serverless function alive after the response is sent.
-    // Without this, Vercel kills the function and the analysis never completes.
     after(async () => {
       try {
         await runAnalysis(analysis.id, repo, prNumber, headSha);

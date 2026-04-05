@@ -12,6 +12,7 @@ import {
   analyzeQuality,
   analyzeWithAI,
 } from "./analyzers";
+import { buildPatternHistory } from "./history-patterns";
 
 const SEVERITY_PENALTY: Record<string, number> = {
   critical: 15,
@@ -39,7 +40,8 @@ function getGrade(score: number): string {
 
 function formatPRComment(
   score: number,
-  findings: Finding[]
+  findings: Finding[],
+  patternHistoryMarkdown: string
 ): string {
   const grade = getGrade(score);
   const emoji: Record<string, string> = {
@@ -98,6 +100,13 @@ function formatPRComment(
     lines.push("");
   }
 
+  if (patternHistoryMarkdown) {
+    lines.push("### Historical pattern review");
+    lines.push("");
+    lines.push(patternHistoryMarkdown);
+    lines.push("");
+  }
+
   lines.push(
     `<sub>Analyzed by <b>FixMerge</b> • ${findings.length} issues found</sub>`
   );
@@ -137,35 +146,48 @@ export async function runAnalysis(
 
     const score = computeScore(allFindings);
 
-    await prisma.pRAnalysis.update({
-      where: { id: analysisId },
-      data: {
-        status: "completed",
-        score,
-        totalIssues: allFindings.length,
-        criticalCount: allFindings.filter((f) => f.severity === "critical").length,
-        highCount: allFindings.filter((f) => f.severity === "high").length,
-        mediumCount: allFindings.filter((f) => f.severity === "medium").length,
-        lowCount: allFindings.filter((f) => f.severity === "low").length,
-        completedAt: new Date(),
-        issues: {
-          create: allFindings.map((f) => ({
-            category: f.category,
-            severity: f.severity,
-            title: f.title,
-            description: f.description,
-            filePath: f.filePath,
-            lineNumber: f.lineNumber,
-            codeSnippet: f.codeSnippet,
-            suggestion: f.suggestion,
-          })),
+    await prisma.$transaction(async (tx) => {
+      await tx.pRAnalysis.update({
+        where: { id: analysisId },
+        data: {
+          status: "completed",
+          score,
+          totalIssues: allFindings.length,
+          criticalCount: allFindings.filter((f) => f.severity === "critical")
+            .length,
+          highCount: allFindings.filter((f) => f.severity === "high").length,
+          mediumCount: allFindings.filter((f) => f.severity === "medium")
+            .length,
+          lowCount: allFindings.filter((f) => f.severity === "low").length,
+          completedAt: new Date(),
+          riskIncidentCount: 0,
+          issues: {
+            create: allFindings.map((f) => ({
+              category: f.category,
+              severity: f.severity,
+              title: f.title,
+              description: f.description,
+              filePath: f.filePath,
+              lineNumber: f.lineNumber,
+              codeSnippet: f.codeSnippet,
+              suggestion: f.suggestion,
+            })),
+          },
         },
-      },
+      });
     });
+
+    let patternHistoryMarkdown = "";
+    try {
+      const ph = await buildPatternHistory(repo, analysisId, allFindings);
+      patternHistoryMarkdown = ph.markdown;
+    } catch (err) {
+      console.warn("Pattern history failed, PR comment will omit it:", err);
+    }
 
     // Post comment back on the PR
     try {
-      const comment = formatPRComment(score, allFindings);
+      const comment = formatPRComment(score, allFindings, patternHistoryMarkdown);
       await postPRComment(repo, prNumber, comment);
     } catch {
       console.warn(`Could not post PR comment for ${repo}#${prNumber}`);

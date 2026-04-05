@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { renderMarkdownLite } from "@/lib/markdown-lite";
 
 function SparkleIcon({ className }: { className?: string }) {
   return (
@@ -8,14 +9,6 @@ function SparkleIcon({ className }: { className?: string }) {
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
   );
-}
-
-function renderMarkdown(text: string): string {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>')
-    .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-[var(--bg-root)] text-[11px] font-mono text-[var(--accent-light)] border border-[var(--border-default)]">$1</code>')
-    .replace(/^(\d+)\.\s/gm, '<span class="text-[var(--accent-light)] font-mono font-semibold">$1.</span> ')
-    .replace(/\n/g, "<br/>");
 }
 
 export function AISummary({ analysisId }: { analysisId: number }) {
@@ -113,7 +106,7 @@ export function AISummary({ analysisId }: { analysisId: number }) {
         {summary && (
           <div
             className="text-[13px] leading-relaxed text-[var(--text-secondary)] [&_strong]:block [&_strong]:mt-3 [&_strong]:mb-1 first:[&_strong]:mt-0"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(summary) }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdownLite(summary) }}
           />
         )}
       </div>

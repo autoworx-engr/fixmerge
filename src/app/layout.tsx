@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { NavUser } from "@/components/nav-user";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,9 +13,7 @@ export const metadata: Metadata = {
 function Logo() {
   return (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-      {/* Rounded square base with gradient */}
       <rect width="30" height="30" rx="8" fill="url(#fm-grad)" />
-      {/* Git merge branch lines */}
       <path
         d="M10 8v6a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4V8"
         stroke="white"
@@ -21,12 +22,9 @@ function Logo() {
         fill="none"
         opacity="0.5"
       />
-      {/* Top dots - two branches */}
       <circle cx="10" cy="7" r="2" fill="white" opacity="0.9" />
       <circle cx="20" cy="7" r="2" fill="white" opacity="0.9" />
-      {/* Bottom merge point with checkmark */}
       <circle cx="15" cy="22" r="3" fill="white" opacity="0.9" />
-      {/* Merge lines converging */}
       <path
         d="M10 14l5 5M20 14l-5 5"
         stroke="white"
@@ -35,7 +33,6 @@ function Logo() {
         fill="none"
         opacity="0.7"
       />
-      {/* Small checkmark in merge point */}
       <path
         d="M13.5 22l1 1 2-2"
         stroke="url(#fm-grad)"
@@ -54,11 +51,21 @@ function Logo() {
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let session = await getSession();
+
+  if (session) {
+    const companyExists = await prisma.company.findUnique({
+      where: { id: session.companyId },
+      select: { id: true },
+    });
+    if (!companyExists) session = null;
+  }
+
   return (
     <html lang="en" className="dark">
       <body className="antialiased min-h-screen">
@@ -80,24 +87,46 @@ export default function RootLayout({
               </div>
             </Link>
             <nav className="flex items-center gap-1">
-              <Link
-                href="/"
-                className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
-              >
-                Dashboard
-              </Link>
-              <a
-                href="/api/analyses"
-                target="_blank"
-                className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
-              >
-                API
-              </a>
-              <div className="w-px h-4 bg-[var(--border-default)] mx-1" />
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-default)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" />
-                <span>online</span>
-              </div>
+              {session ? (
+                <>
+                  <Link
+                    href="/"
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/docs"
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
+                  >
+                    Docs
+                  </Link>
+                  <div className="w-px h-4 bg-[var(--border-default)] mx-1" />
+                  <NavUser name={session.name} email={session.email} />
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/docs"
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
+                  >
+                    Docs
+                  </Link>
+                  <div className="w-px h-4 bg-[var(--border-default)] mx-1" />
+                  <Link
+                    href="/login"
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-light)] hover:bg-[var(--accent-glow)] transition-all"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium bg-[var(--accent)] text-white hover:brightness-110 transition-all"
+                  >
+                    Get started
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         </header>

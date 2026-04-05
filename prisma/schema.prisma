@@ -7,38 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model PRAnalysis {
-  id            Int      @id @default(autoincrement())
-  repoFullName  String
-  prNumber      Int
-  prTitle       String   @default("")
-  prUrl         String   @default("")
-  author        String   @default("")
-  trigger       String   @default("opened") // opened, synchronize, merged
-  mergedAt      DateTime?
-  baseBranch    String   @default("")
-  headBranch    String   @default("")
-  status        String   @default("pending") // pending, running, completed, failed
-  totalIssues   Int      @default(0)
-  criticalCount Int      @default(0)
-  highCount     Int      @default(0)
-  mediumCount   Int      @default(0)
-  lowCount      Int      @default(0)
-  score         Int      @default(100) // 0-100
-  createdAt     DateTime @default(now())
-  completedAt   DateTime?
+model Company {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  apiKey       String    @unique @default(uuid())
+  createdAt    DateTime  @default(now())
 
-  issues Issue[]
+  projects Project[]
+}
+
+model Project {
+  id            Int          @id @default(autoincrement())
+  companyId     Int
+  name          String
+  repoFullName  String       @unique
+  webhookSecret String       @default(uuid())
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+
+  company   Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  analyses  PRAnalysis[]
+  incidents ProductionIncident[]
+
+  @@index([companyId])
+  @@index([repoFullName])
+}
+
+model PRAnalysis {
+  id                Int       @id @default(autoincrement())
+  repoFullName      String
+  prNumber          Int
+  prTitle           String    @default("")
+  prUrl             String    @default("")
+  author            String    @default("")
+  trigger           String    @default("opened")
+  mergedAt          DateTime?
+  baseBranch        String    @default("")
+  headBranch        String    @default("")
+  status            String    @default("pending")
+  totalIssues       Int       @default(0)
+  criticalCount     Int       @default(0)
+  highCount         Int       @default(0)
+  mediumCount       Int       @default(0)
+  lowCount          Int       @default(0)
+  score             Int       @default(100)
+  riskIncidentCount Int       @default(0)
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+
+  projectId   Int?
+  project     Project?               @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  issues      Issue[]
+  riskMatches PRAnalysisRiskMatch[]
 
   @@index([repoFullName])
   @@index([repoFullName, prNumber])
+  @@index([projectId])
+}
+
+/// Optional external production signals (generic webhook ingest) — reserved for future correlation.
+model ProductionIncident {
+  id           Int      @id @default(autoincrement())
+  projectId    Int?
+  repoFullName String
+  externalId   String
+  source       String   @default("generic")
+  title        String   @default("")
+  paths        String[] @default([])
+  eventCount   Int      @default(1)
+  firstSeenAt  DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project     Project?               @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  riskMatches PRAnalysisRiskMatch[]
+
+  @@unique([repoFullName, externalId])
+  @@index([repoFullName])
+  @@index([lastSeenAt])
+  @@index([projectId])
+}
+
+/// Snapshot of which stored incidents overlapped PR files for a given analysis run.
+model PRAnalysisRiskMatch {
+  id           Int      @id @default(autoincrement())
+  analysisId   Int
+  incidentId   Int
+  matchedPaths String[] @default([])
+  createdAt    DateTime @default(now())
+
+  analysis PRAnalysis         @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  incident ProductionIncident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId])
+  @@index([incidentId])
 }
 
 model Issue {
   id          Int      @id @default(autoincrement())
   analysisId  Int
-  category    String   // bug, security, complexity, quality
-  severity    String   // critical, high, medium, low, info
+  category    String
+  severity    String
   title       String
   description String   @default("")
   filePath    String   @default("")

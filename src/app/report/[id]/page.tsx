@@ -7,6 +7,7 @@ import { GradeBadge } from "@/components/grade-badge";
 import { ScoreRing } from "@/components/score-ring";
 import { IssueCard } from "@/components/issue-card";
 import { AISummary } from "@/components/ai-summary";
+import { PatternHistoryPanel } from "@/components/pattern-history-panel";
 
 interface Issue {
   id: number;
@@ -18,6 +19,13 @@ interface Issue {
   lineNumber: number | null;
   codeSnippet: string;
   suggestion: string;
+}
+
+interface PatternHistory {
+  recurring: unknown[];
+  seenOnce: unknown[];
+  brandNew: unknown[];
+  markdown: string;
 }
 
 interface Analysis {
@@ -38,6 +46,7 @@ interface Analysis {
   mergedAt: string | null;
   createdAt: string;
   completedAt: string | null;
+  patternHistory: PatternHistory | null;
   issues: Issue[];
 }
 
@@ -61,7 +70,15 @@ export default function ReportPage() {
     fetch(`/api/analyses/${params.id}`)
       .then((r) => r.json())
       .then((data) => {
-        setAnalysis(data);
+        if (data && typeof data === "object" && !("error" in data)) {
+          const a = data as Analysis;
+          setAnalysis({
+            ...a,
+            patternHistory: a.patternHistory ?? null,
+          });
+        } else {
+          setAnalysis(null);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -167,6 +184,10 @@ export default function ReportPage() {
       <div className="mb-6">
         <AISummary analysisId={analysis.id} />
       </div>
+
+      <PatternHistoryPanel
+        markdown={analysis.patternHistory?.markdown ?? null}
+      />
 
       {/* Issues */}
       {analysis.issues.length > 0 ? (

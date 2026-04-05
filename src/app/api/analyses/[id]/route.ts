@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { buildPatternHistory } from "@/lib/history-patterns";
+import type { PatternHistoryResult } from "@/lib/history-patterns";
 
 export async function GET(
   _request: NextRequest,
@@ -10,7 +12,9 @@ export async function GET(
 
   const analysis = await prisma.pRAnalysis.findUnique({
     where: { id: analysisId },
-    include: { issues: { orderBy: [{ severity: "asc" }, { category: "asc" }] } },
+    include: {
+      issues: { orderBy: [{ severity: "asc" }, { category: "asc" }] },
+    },
   });
 
   if (!analysis) {
@@ -18,6 +22,25 @@ export async function GET(
   }
 
   const grade = getGrade(analysis.score);
+
+  let patternHistory: PatternHistoryResult | null = null;
+
+  if (analysis.status === "completed" && analysis.issues.length > 0) {
+    try {
+      patternHistory = await buildPatternHistory(
+        analysis.repoFullName,
+        analysis.id,
+        analysis.issues.map((i) => ({
+          title: i.title,
+          category: i.category,
+          filePath: i.filePath || "",
+          severity: i.severity,
+        }))
+      );
+    } catch {
+      patternHistory = null;
+    }
+  }
 
   return NextResponse.json({
     id: analysis.id,
@@ -37,6 +60,7 @@ export async function GET(
     mergedAt: analysis.mergedAt?.toISOString() || null,
     createdAt: analysis.createdAt.toISOString(),
     completedAt: analysis.completedAt?.toISOString() || null,
+    patternHistory,
     issues: analysis.issues.map((i) => ({
       id: i.id,
       category: i.category,
