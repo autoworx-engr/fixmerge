@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { EditRepoForm } from "@/components/edit-repo-form";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -40,10 +41,12 @@ function SecretToggle({ value }: { value: string }) {
 }
 
 export function ProjectSetup({
+  projectId,
   repoFullName,
   webhookSecret,
   apiKey,
 }: {
+  projectId: number;
   repoFullName: string;
   webhookSecret: string;
   apiKey: string;
@@ -150,6 +153,17 @@ export function ProjectSetup({
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 pt-5 border-t border-[var(--border-default)]">
+        <p className="text-[12px] font-semibold text-[var(--text-secondary)] mb-3">
+          Repository URL
+        </p>
+        <EditRepoForm
+          projectId={projectId}
+          initialRepo={repoFullName}
+          variant="compact"
+        />
       </div>
 
       {/* API Key */}
