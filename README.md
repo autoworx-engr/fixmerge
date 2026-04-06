@@ -39,14 +39,27 @@ Open http://localhost:3000 to see the dashboard.
 
 ## Set Up GitHub Webhook
 
-In your GitHub repo → Settings → Webhooks → Add webhook:
+Each registered project gets its own **webhook secret** in the dashboard (stored in the database). In the GitHub repo → Settings → Webhooks → Add webhook:
 
-- **Payload URL:** `https://your-server.com/api/webhook/github`
+- **Payload URL:** `https://your-server.com/api/webhook/github` (same URL for every customer; the server looks up the repo from the payload)
 - **Content type:** `application/json`
-- **Secret:** same as `GITHUB_WEBHOOK_SECRET` in `.env`
+- **Secret:** the **project webhook secret** from the FixMerge dashboard for that repository (not a single global value per company)
 - **Events:** Select "Pull requests"
 
 For local development, use [ngrok](https://ngrok.com) to expose localhost.
+
+## Environment variables (one deployment, many companies)
+
+| Variable | Scope | Purpose |
+|----------|--------|---------|
+| `DATABASE_URL` | **Server** | One Postgres for the whole app; each company/project is a row (`Company`, `Project`). |
+| `GITHUB_TOKEN` | **Server** | PAT (or future: GitHub App) the server uses to call GitHub for **all** repos you analyze. It must be able to read those repositories (broad org token, or a bot account with access). |
+| `GITHUB_WEBHOOK_SECRET` | **Optional** | Global fallback HMAC secret for webhooks whose `repository.full_name` is **not** yet linked to a `Project`. If unset, those requests skip signature verification. **Registered projects always use their dashboard `webhookSecret`**, not this env var. |
+| `AI_API_KEY` / `OPENAI_API_KEY` | **Server** | Optional; shared AI quota for the deployment unless you later split per tenant. |
+
+**Webhook secrets:** Managed per **project** in the DB (`Project.webhookSecret`). Each GitHub repo pastes its own secret when configuring the webhook—no per-customer `.env` file on your server.
+
+**API keys:** Each **company** gets a unique `apiKey` (Bearer token) for `/api/analyses` etc., also stored in the database.
 
 ## API Endpoints
 

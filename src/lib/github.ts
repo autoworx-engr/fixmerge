@@ -94,11 +94,12 @@ export async function enrichFilesWithContent(
   return enriched;
 }
 
+/** When `secret` is omitted or empty, verification is skipped (dev / open webhooks). */
 export function verifyWebhookSignature(
   payload: string,
-  signature: string
+  signature: string,
+  secret?: string | null
 ): boolean {
-  const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!secret) return true;
   if (!signature) return false;
 

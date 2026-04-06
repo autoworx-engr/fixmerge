@@ -9,10 +9,30 @@ const TRIGGER_ACTIONS = new Set(["opened", "synchronize", "reopened"]);
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
-
     const signature = request.headers.get("x-hub-signature-256") || "";
-    const secret = process.env.GITHUB_WEBHOOK_SECRET;
-    if (secret && !verifyWebhookSignature(body, signature)) {
+
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(body) as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const repoFullName =
+      typeof payload.repository === "object" &&
+      payload.repository !== null &&
+      typeof (payload.repository as { full_name?: unknown }).full_name === "string"
+        ? (payload.repository as { full_name: string }).full_name
+        : null;
+
+    const project = repoFullName
+      ? await prisma.project.findUnique({ where: { repoFullName } })
+      : null;
+
+    // Per-project secret (dashboard) for multi-tenant; optional global env fallback for unregistered repos.
+    const signingSecret =
+      project?.webhookSecret ?? process.env.GITHUB_WEBHOOK_SECRET ?? null;
+    if (!verifyWebhookSignature(body, signature, signingSecret)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
@@ -24,25 +44,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: "ignored", event });
     }
 
-    const payload = JSON.parse(body);
-    const action: string = payload.action;
-    const pr = payload.pull_request;
+    const prPayload = payload as {
+      action?: string;
+      pull_request?: {
+        number: number;
+        title?: string;
+        html_url?: string;
+        merged?: boolean;
+        merged_at?: string | null;
+        user?: { login?: string };
+        head?: { sha: string; ref?: string };
+        base?: { ref?: string };
+      };
+      repository?: { full_name?: string };
+    };
 
-    const isMerge = action === "closed" && pr?.merged === true;
+    const action = prPayload.action ?? "";
+    const pr = prPayload.pull_request;
+    if (!repoFullName || !pr?.number || !pr.head?.sha) {
+      return NextResponse.json({ error: "Invalid pull_request payload" }, { status: 400 });
+    }
+
+    const isMerge = action === "closed" && pr.merged === true;
     const isReviewTrigger = TRIGGER_ACTIONS.has(action);
 
     if (!isMerge && !isReviewTrigger) {
       return NextResponse.json({ status: "ignored", action });
     }
 
-    const repo: string = payload.repository.full_name;
-    const prNumber: number = pr.number;
-    const headSha: string = pr.head.sha;
+    const repo = repoFullName;
+    const prNumber = pr.number;
+    const headSha = pr.head.sha;
     const trigger = isMerge ? "merged" : action;
-
-    const project = await prisma.project.findUnique({
-      where: { repoFullName: repo },
-    });
 
     if (action === "synchronize") {
       await prisma.pRAnalysis.deleteMany({
